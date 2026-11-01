@@ -1,0 +1,1120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>China XX Bank – Online Banking (Demo)</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --blue:#C8102E;--blue-dark:#A00D24;--blue-light:#FDE8EB;--blue-hero:#FDF1F2;
+  --text:#1a2a3a;--text-muted:#5a6a7a;--border:#D0D8E0;--border-light:#E8EEF4;
+  --success:#0A7A3E;--success-bg:#E6F5EC;--fail:#C62828;--fail-bg:#FDECEA;
+  --pending:#B8860B;--pending-bg:#FFF8E1;--brand-red:#C8102E;
+  --radius:6px;--pill:999px;--shadow:0 1px 3px rgba(80,0,20,.08);
+  --font:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+}
+html{font-size:16px}
+body{font-family:var(--font);color:var(--text);background:#fff;min-height:100vh;display:flex;flex-direction:column;line-height:1.5}
+a{color:var(--blue);text-decoration:none;cursor:pointer}
+a:hover{text-decoration:underline}
+button{font-family:inherit;cursor:pointer;border:none;background:none}
+input,select,textarea{font-family:inherit;font-size:1rem}
+.hidden{display:none!important}
+
+/* Top nav */
+.top-nav{display:flex;align-items:center;justify-content:space-between;padding:14px 32px;background:#fff;border-bottom:1px solid var(--border-light);position:sticky;top:0;z-index:100}
+.brand{display:flex;align-items:center;gap:12px}
+.brand-mark{width:32px;height:32px;border-radius:50%;background:var(--brand-red);flex-shrink:0;display:block}
+.brand-text{display:flex;flex-direction:column;line-height:1.2}
+.brand-text .en{font-weight:700;font-size:15px;color:var(--text);letter-spacing:.02em}
+.brand-text .zh{font-size:12px;color:var(--text-muted)}
+.nav-right{display:flex;align-items:center;gap:16px}
+.lang-toggle{display:flex;border:1px solid var(--border);border-radius:var(--pill);overflow:hidden;font-size:13px}
+.lang-toggle button{padding:6px 14px;color:var(--text-muted);background:#fff;transition:all .15s}
+.lang-toggle button.active{background:var(--blue);color:#fff}
+.secure-badge{display:flex;align-items:center;gap:6px;font-size:13px;color:var(--text-muted)}
+.secure-badge svg{width:14px;height:14px;fill:var(--success)}
+.nav-links{display:flex;align-items:center;gap:20px;font-size:14px}
+.nav-links a{color:var(--blue);display:flex;align-items:center;gap:5px}
+.btn-logout{background:var(--blue);color:#fff;padding:8px 20px;border-radius:var(--pill);font-size:14px;font-weight:500;transition:background .15s}
+.btn-logout:hover{background:var(--blue-dark);text-decoration:none}
+
+/* Secondary nav (logged in) */
+.sec-nav{display:flex;gap:0;padding:0 32px;border-bottom:1px solid var(--border-light);background:#fff;overflow-x:auto}
+.sec-nav a{padding:14px 18px;font-size:14px;color:var(--text-muted);border-bottom:3px solid transparent;white-space:nowrap;transition:all .15s}
+.sec-nav a:hover{color:var(--blue);text-decoration:none}
+.sec-nav a.active{color:var(--blue);border-bottom-color:var(--blue);font-weight:600}
+
+/* Hero band */
+.hero-band{background:var(--blue-hero);padding:36px 32px 28px}
+.hero-band h1{font-size:2.15rem;font-weight:200;color:#5C0A16;display:flex;align-items:center;gap:14px;letter-spacing:-0.01em}
+.hero-band h1::before{content:"";display:inline-block;width:4px;height:1.1em;background:var(--blue);border-radius:2px;flex-shrink:0}
+.hero-band .sub{margin-top:8px;color:var(--text-muted);font-size:14px;padding-left:18px}
+
+/* Main content */
+.main{flex:1;padding:28px 32px 48px;max-width:720px;width:100%;margin:0}
+.main.wide{max-width:1100px}
+.main.full{max-width:100%;padding-left:32px;padding-right:32px}
+
+/* Login form */
+.login-prompt{font-size:1.15rem;font-weight:500;color:var(--text);margin-bottom:6px}
+.login-hint{font-size:13px;color:var(--text-muted);margin-bottom:24px}
+.tabs{display:flex;border-bottom:1px solid var(--border);margin-bottom:28px;gap:0}
+.tab{padding:14px 22px;font-size:14px;color:var(--text-muted);border:1px solid transparent;border-bottom:none;border-radius:8px 8px 0 0;margin-bottom:-1px;position:relative;background:transparent;transition:color .15s}
+.tab:hover{color:var(--blue)}
+.tab.active{color:var(--blue);font-weight:600;border-color:var(--border);border-bottom-color:#fff;background:#fff}
+.tab.active::before{content:"";position:absolute;top:0;left:-1px;right:-1px;height:3px;background:var(--blue);border-radius:2px 2px 0 0}
+.tab.active::after{content:"";position:absolute;bottom:-1px;left:0;right:0;height:2px;background:#fff}
+.form-group{margin-bottom:20px}
+.form-group label{display:block;font-size:14px;font-weight:500;margin-bottom:6px;color:var(--text)}
+.form-group label .info{display:inline-flex;align-items:center;justify-content:center;width:16px;height:16px;border-radius:50%;background:var(--blue);color:#fff;font-size:11px;font-style:normal;margin-left:4px;vertical-align:middle}
+.form-input{width:100%;max-width:440px;padding:13px 14px;border:1px solid var(--border);border-radius:8px;font-size:1rem;transition:border-color .15s;outline:none;background:#fff}
+.form-input:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(200,16,46,.18)}
+.form-check{display:flex;align-items:flex-start;gap:10px;margin:20px 0 8px;max-width:420px}
+.form-check input{margin-top:3px;width:16px;height:16px;accent-color:var(--blue)}
+.form-check label{font-size:14px;color:var(--text)}
+.form-note{font-size:12px;color:var(--text-muted);margin-left:26px;margin-bottom:24px}
+.btn-primary{display:inline-flex;align-items:center;justify-content:center;background:var(--blue);color:#fff;padding:12px 36px;border-radius:var(--pill);font-size:1rem;font-weight:500;transition:background .15s;min-width:140px}
+.btn-primary:hover{background:var(--blue-dark)}
+.btn-primary:disabled{opacity:.5;cursor:not-allowed}
+.btn-secondary{display:inline-flex;align-items:center;justify-content:center;background:#fff;color:var(--blue);padding:12px 28px;border-radius:var(--pill);font-size:1rem;font-weight:500;border:2px solid var(--blue);transition:all .15s}
+.btn-secondary:hover{background:var(--blue-light)}
+.btn-ghost{color:var(--blue);font-size:14px;padding:8px 12px}
+.btn-ghost:hover{text-decoration:underline}
+.btn-row{display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-top:8px}
+.code-inputs{display:flex;gap:10px;margin-bottom:24px}
+.code-inputs input{width:48px;height:52px;text-align:center;font-size:1.4rem;font-weight:600;border:1px solid var(--border);border-radius:var(--radius);outline:none}
+.code-inputs input:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(200,16,46,.18)}
+.step-indicator{font-size:13px;color:var(--text-muted);margin-bottom:16px}
+.alert-box{background:var(--blue-light);border-left:4px solid var(--blue);padding:14px 18px;border-radius:0 var(--radius) var(--radius) 0;margin-bottom:24px;font-size:14px;max-width:520px}
+.alert-warn{background:#FFF8E1;border-left-color:var(--pending)}
+
+/* Dashboard */
+.dash-hero{background:var(--blue-hero);padding:32px}
+.greeting{font-size:1.75rem;font-weight:600;color:var(--text)}
+.last-login{font-size:13px;color:var(--text-muted);margin-top:4px;margin-bottom:24px}
+.account-card{background:#fff;border:1px solid var(--border);border-radius:8px;padding:28px 32px;display:grid;grid-template-columns:minmax(200px,1.4fr) auto auto;gap:32px;align-items:center;box-shadow:var(--shadow);max-width:960px}
+.acct-name{font-weight:700;font-size:15px;letter-spacing:.03em;text-transform:uppercase;color:var(--text);display:flex;align-items:center;gap:8px}
+.acct-name .dot{width:8px;height:8px;border-radius:50%;background:var(--brand-red)}
+.acct-details{font-size:13px;color:var(--text-muted);margin-top:6px}
+.acct-link{display:inline-block;margin-top:10px;font-size:13px;color:var(--blue)}
+.acct-balance{text-align:right}
+.acct-balance .amount{font-size:1.75rem;font-weight:700;color:var(--text)}
+.acct-balance .label{font-size:12px;color:var(--text-muted);margin-top:2px}
+.acct-actions{display:flex;gap:16px}
+.acct-action{display:flex;flex-direction:column;align-items:center;gap:6px;font-size:12px;color:var(--blue);cursor:pointer}
+.acct-action .icon-circle{width:44px;height:44px;border-radius:50%;border:2px solid var(--blue);display:flex;align-items:center;justify-content:center}
+.acct-action .icon-circle svg{width:20px;height:20px;stroke:var(--blue);fill:none;stroke-width:1.8}
+.acct-action.disabled{opacity:.4;pointer-events:none;color:var(--text-muted)}
+.acct-action.disabled .icon-circle{border-color:var(--border)}
+.acct-action.disabled .icon-circle svg{stroke:var(--text-muted)}
+
+.quick-actions{display:flex;gap:32px;padding:36px 0 28px;flex-wrap:wrap}
+.qa-item{display:flex;flex-direction:column;align-items:center;gap:10px;width:110px;text-align:center;cursor:pointer}
+.qa-item .qa-icon{width:56px;height:56px;border-radius:50%;background:var(--blue);display:flex;align-items:center;justify-content:center;transition:background .15s}
+.qa-item:hover .qa-icon{background:var(--blue-dark)}
+.qa-item .qa-icon svg{width:24px;height:24px;stroke:#fff;fill:none;stroke-width:1.8}
+.qa-item span{font-size:12px;color:var(--text);line-height:1.3}
+.qa-item.disabled{opacity:.4;pointer-events:none}
+.qa-item.disabled .qa-icon{background:#A0AEC0}
+
+.section-title{font-size:1.25rem;font-weight:600;margin:28px 0 16px;color:var(--text)}
+
+/* Transactions */
+.filters{display:flex;flex-wrap:wrap;gap:12px;margin-bottom:20px;align-items:flex-end}
+.filter-group{display:flex;flex-direction:column;gap:4px}
+.filter-group label{font-size:12px;color:var(--text-muted);font-weight:500}
+.filter-group input,.filter-group select{padding:8px 12px;border:1px solid var(--border);border-radius:var(--radius);font-size:14px;outline:none;min-width:140px}
+.filter-group input:focus,.filter-group select:focus{border-color:var(--blue)}
+.search-box{flex:1;min-width:180px}
+.tx-table-wrap{overflow-x:auto;border:1px solid var(--border);border-radius:8px}
+table.tx-table{width:100%;border-collapse:collapse;font-size:14px}
+table.tx-table th{background:var(--blue-hero);text-align:left;padding:12px 14px;font-weight:600;font-size:12px;text-transform:uppercase;letter-spacing:.04em;color:var(--text-muted);border-bottom:1px solid var(--border);white-space:nowrap}
+table.tx-table td{padding:12px 14px;border-bottom:1px solid var(--border-light);vertical-align:middle}
+table.tx-table tr:last-child td{border-bottom:none}
+table.tx-table tbody tr{cursor:pointer;transition:background .1s}
+table.tx-table tbody tr:hover{background:var(--blue-light)}
+table.tx-table tbody tr.selected{background:var(--blue-light)}
+.amount-pos{color:var(--success);font-weight:600}
+.amount-neg{color:var(--text);font-weight:600}
+.badge{display:inline-block;padding:3px 10px;border-radius:var(--pill);font-size:12px;font-weight:600;white-space:nowrap}
+.badge-success{background:var(--success-bg);color:var(--success)}
+.badge-failed{background:var(--fail-bg);color:var(--fail)}
+.badge-pending{background:var(--pending-bg);color:var(--pending)}
+
+/* Detail panel */
+.detail-overlay{position:fixed;inset:0;background:rgba(0,20,40,.35);z-index:200;display:flex;justify-content:flex-end}
+.detail-panel{width:420px;max-width:100%;background:#fff;height:100%;overflow-y:auto;padding:28px;box-shadow:-4px 0 24px rgba(0,0,0,.12);animation:slideIn .2s ease}
+@keyframes slideIn{from{transform:translateX(100%)}to{transform:translateX(0)}}
+.detail-panel h2{font-size:1.2rem;font-weight:600;margin-bottom:4px}
+.detail-close{float:right;width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;color:var(--text-muted);font-size:20px}
+.detail-close:hover{background:var(--border-light)}
+.detail-row{display:flex;justify-content:space-between;padding:12px 0;border-bottom:1px solid var(--border-light);font-size:14px}
+.detail-row .lbl{color:var(--text-muted)}
+.detail-row .val{font-weight:500;text-align:right;max-width:60%;word-break:break-word}
+
+/* Statements */
+.stmt-list{display:flex;flex-direction:column;gap:0;border:1px solid var(--border);border-radius:8px;overflow:hidden}
+.stmt-item{display:flex;align-items:center;justify-content:space-between;padding:16px 20px;border-bottom:1px solid var(--border-light);transition:background .1s}
+.stmt-item:last-child{border-bottom:none}
+.stmt-item:hover{background:var(--blue-light)}
+.stmt-info{display:flex;align-items:center;gap:14px}
+.stmt-icon{width:40px;height:40px;border-radius:8px;background:var(--blue-light);display:flex;align-items:center;justify-content:center}
+.stmt-icon svg{width:20px;height:20px;stroke:var(--blue);fill:none;stroke-width:1.8}
+.stmt-name{font-weight:500;font-size:14px}
+.stmt-meta{font-size:12px;color:var(--text-muted)}
+.btn-download{background:var(--blue);color:#fff;padding:8px 20px;border-radius:var(--pill);font-size:13px;font-weight:500}
+.btn-download:hover{background:var(--blue-dark)}
+.custom-range{background:var(--blue-hero);border-radius:8px;padding:20px;margin-bottom:24px}
+.custom-range h3{font-size:15px;font-weight:600;margin-bottom:12px}
+
+/* Footer */
+.site-footer{border-top:1px solid var(--border-light);padding:16px 32px;text-align:center;font-size:12px;color:var(--text-muted);background:#FAFBFC}
+.demo-note{display:inline-block;background:#FFF3CD;color:#856404;padding:2px 10px;border-radius:var(--pill);font-size:11px;font-weight:600;margin-right:8px}
+
+/* Print statement */
+@media print{
+  .top-nav,.sec-nav,.site-footer,.filters,.btn-row,.no-print{display:none!important}
+  .main{padding:0;max-width:100%}
+  body{background:#fff}
+}
+
+/* Hamburger (hidden on desktop) */
+.btn-menu{display:none;width:44px;height:44px;align-items:center;justify-content:center;border-radius:8px;color:var(--text);flex-shrink:0}
+.btn-menu:hover{background:var(--blue-light)}
+.btn-menu svg{width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round}
+.mobile-drawer{display:none}
+.desktop-only-logout{}
+
+/* Mobile card table helpers (inactive on desktop) */
+table.tx-table td[data-label]::before{display:none}
+
+/* Responsive */
+@media(max-width:768px){
+  .top-nav{padding:8px 12px;gap:8px}
+  .nav-right{gap:8px}
+  .brand{gap:8px;min-width:0;flex:1}
+  .brand-text{min-width:0}
+  .brand-text .en,.brand-text .zh{font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
+  html[lang="zh-CN"] .brand-text .en{display:none}
+  html:not([lang="zh-CN"]) .brand-text .zh{display:none}
+  .lang-toggle{flex-shrink:0}
+  .lang-toggle button{min-height:44px;padding:0 12px;font-size:13px}
+  .secure-badge span{display:none}
+  .secure-badge{padding:10px;min-width:44px;min-height:44px;justify-content:center}
+  .nav-links{display:none!important}
+  .btn-menu{display:inline-flex}
+  .btn-menu.hidden{display:none!important}
+
+  .mobile-drawer{display:none;position:fixed;inset:0;z-index:300;background:rgba(20,0,10,.4)}
+  .mobile-drawer.open{display:block}
+  .mobile-drawer-panel{position:absolute;top:0;right:0;width:min(320px,86vw);height:100%;background:#fff;padding:20px 16px;box-shadow:-4px 0 24px rgba(0,0,0,.15);display:flex;flex-direction:column;gap:4px;animation:slideIn .2s ease}
+  .mobile-drawer-panel a,.mobile-drawer-panel button.drawer-link{
+    display:flex;align-items:center;min-height:48px;padding:12px 14px;border-radius:8px;
+    font-size:16px;color:var(--text);text-decoration:none;border:none;background:transparent;text-align:left;width:100%;
+  }
+  .mobile-drawer-panel a:hover,.mobile-drawer-panel button.drawer-link:hover{background:var(--blue-light);text-decoration:none}
+  .mobile-drawer-panel a.active{color:var(--blue);font-weight:600;background:var(--blue-light)}
+  .drawer-logout{margin-top:12px;background:var(--blue)!important;color:#fff!important;justify-content:center;border-radius:var(--pill)!important;font-weight:500}
+  .drawer-close{align-self:flex-end;width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:22px;color:var(--text-muted);margin-bottom:8px}
+  .drawer-close:hover{background:var(--border-light)}
+
+  /* Scrollable tab bar */
+  .sec-nav{padding:0 4px;gap:0;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+  .sec-nav::-webkit-scrollbar{display:none}
+  .sec-nav a{padding:14px 16px;min-height:48px;display:inline-flex;align-items:center;font-size:15px}
+
+  .hero-band{padding:22px 16px 18px}
+  .hero-band h1{font-size:1.45rem;gap:10px}
+  .hero-band .sub{padding-left:14px;font-size:13px;word-break:break-word}
+  .main{padding:16px 16px 40px;max-width:100%}
+  .main.wide{max-width:100%}
+
+  .tabs{overflow-x:auto;-webkit-overflow-scrolling:touch}
+  .tab{padding:14px 16px;min-height:48px;white-space:nowrap;flex-shrink:0}
+  .form-input{max-width:100%}
+  .form-check{max-width:100%}
+  .btn-primary,.btn-secondary{min-height:48px;width:100%;max-width:100%}
+  .btn-row{flex-direction:column;align-items:stretch}
+  .btn-ghost{min-height:44px;display:inline-flex;align-items:center;justify-content:center}
+  .code-inputs{justify-content:space-between;gap:6px}
+  .code-inputs input{width:48px;height:52px;flex:1;max-width:52px}
+
+  .dash-hero{padding:20px 16px}
+  .greeting{font-size:1.35rem}
+  .account-card{grid-template-columns:1fr;gap:16px;padding:18px 16px}
+  .acct-balance{text-align:left}
+  .acct-balance .amount{font-size:1.6rem}
+  .acct-actions{justify-content:flex-start;gap:20px;flex-wrap:wrap}
+  .acct-action{min-width:72px}
+  .acct-action .icon-circle{width:48px;height:48px}
+  .quick-actions{gap:16px 12px;justify-content:space-around;padding:28px 0 20px}
+  .qa-item{width:72px}
+  .qa-item .qa-icon{width:52px;height:52px}
+
+  /* Filters stack */
+  .filters{flex-direction:column;align-items:stretch;gap:10px}
+  .filter-group{width:100%}
+  .filter-group input,.filter-group select{min-width:0;width:100%;min-height:44px;font-size:16px}
+  .search-box{min-width:0;width:100%}
+  #btnFilter{width:100%;min-height:48px}
+
+  /* Transactions → cards */
+  .tx-table-wrap{border:none;overflow:visible}
+  table.tx-table{border:none}
+  table.tx-table thead{display:none}
+  table.tx-table tbody{display:flex;flex-direction:column;gap:10px}
+  table.tx-table tr{display:block;border:1px solid var(--border);border-radius:10px;padding:12px 14px;background:#fff;box-shadow:var(--shadow)}
+  table.tx-table tr:last-child td{border-bottom:1px solid var(--border-light)}
+  table.tx-table td{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;padding:7px 0;border-bottom:1px solid var(--border-light);font-size:14px}
+  table.tx-table td:last-child{border-bottom:none;padding-bottom:0}
+  table.tx-table td:first-child{padding-top:0}
+  table.tx-table td[data-label]::before{
+    display:block;content:attr(data-label);font-size:12px;font-weight:600;color:var(--text-muted);
+    text-transform:uppercase;letter-spacing:.03em;flex-shrink:0;padding-top:2px;
+  }
+  table.tx-table td > *{text-align:right}
+
+  /* Detail panel full-screen */
+  .detail-overlay{align-items:stretch}
+  .detail-panel{width:100%;max-width:100%;border-radius:0;padding:20px 16px 40px;animation:slideUp .22s ease}
+  @keyframes slideUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
+  .detail-close{width:44px;height:44px;font-size:24px}
+
+  /* Statements */
+  .stmt-item{flex-direction:column;align-items:flex-start;gap:12px;padding:16px}
+  .stmt-item > div:last-child{display:flex;flex-wrap:wrap;gap:8px;width:100%}
+  .stmt-item .btn-download,.stmt-item .btn-secondary{flex:1;min-height:44px;justify-content:center}
+  .custom-range .filters{margin-bottom:0}
+  .custom-range .btn-download,.custom-range .btn-secondary{width:100%;min-height:44px;justify-content:center}
+
+  .site-footer{padding:14px 16px;text-align:left;line-height:1.6}
+  .demo-note{display:inline-block;margin-bottom:6px;margin-right:6px}
+}
+</style>
+</head>
+<body>
+
+<!-- ===== TOP NAV ===== -->
+<header class="top-nav" id="topNav">
+  <div class="brand">
+    <div class="brand-mark" aria-hidden="true"></div>
+    <div class="brand-text">
+      <span class="en">China XX Bank</span>
+      <span class="zh">中国某某银行</span>
+    </div>
+  </div>
+  <div class="nav-right">
+    <div class="lang-toggle" id="langToggle">
+      <button type="button" data-lang="zh" id="btnZh">中文</button>
+      <button type="button" data-lang="en" id="btnEn" class="active">English</button>
+    </div>
+    <div class="secure-badge" id="secureBadge">
+      <svg viewBox="0 0 24 24"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4z"/></svg>
+      <span data-i18n="secure">Secure</span>
+    </div>
+    <div class="nav-links hidden" id="loggedInNav">
+      <a href="#dashboard" data-i18n="nav_home">Home</a>
+      <button type="button" class="btn-logout" id="btnLogout" data-i18n="logout">Logout</button>
+    </div>
+    <button type="button" class="btn-menu hidden" id="btnMenu" aria-label="Menu" aria-expanded="false">
+      <svg viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+    </button>
+  </div>
+</header>
+
+<div class="mobile-drawer" id="mobileDrawer" aria-hidden="true">
+  <div class="mobile-drawer-panel" role="dialog" aria-label="Menu">
+    <button type="button" class="drawer-close" id="drawerClose" aria-label="Close">&times;</button>
+    <a href="#dashboard" data-page="dashboard" data-i18n="nav_home" class="drawer-nav">Home</a>
+    <a href="#transactions" data-page="transactions" data-i18n="nav_transactions" class="drawer-nav">Transactions</a>
+    <a href="#statements" data-page="statements" data-i18n="nav_statements" class="drawer-nav">Statements</a>
+    <button type="button" class="drawer-link drawer-logout" id="btnLogoutMobile" data-i18n="logout">Logout</button>
+  </div>
+</div>
+
+<!-- Secondary nav (logged in) — scrollable tab bar on mobile -->
+<nav class="sec-nav hidden" id="secNav">
+  <a href="#dashboard" data-page="dashboard" data-i18n="nav_home">Home</a>
+  <a href="#transactions" data-page="transactions" data-i18n="nav_transactions">Transactions</a>
+  <a href="#statements" data-page="statements" data-i18n="nav_statements">Statements</a>
+</nav>
+
+<!-- ===== VIEWS ===== -->
+<div id="app">
+
+  <!-- LOGIN -->
+  <div id="view-login" class="view">
+    <div class="hero-band">
+      <h1 data-i18n="login_title">Log in to Online Banking</h1>
+    </div>
+    <div class="main">
+      <p class="login-prompt" data-i18n="login_how">How would you like to log in?</p>
+      <p class="login-hint"><span data-i18n="login_demo_hint">Demo: leave fields empty and continue — no real authentication.</span></p>
+      <div class="tabs">
+        <button type="button" class="tab active" data-tab="customer" data-i18n="tab_customer">Customer ID</button>
+        <button type="button" class="tab" data-tab="sort" data-i18n="tab_sort">Sort code &amp; account</button>
+      </div>
+      <div id="tab-customer">
+        <div class="form-group">
+          <label for="customerId"><span data-i18n="label_customer_id">Customer ID</span></label>
+          <input type="text" class="form-input" id="customerId" autocomplete="username" placeholder="">
+        </div>
+        <div class="form-group">
+          <label for="password"><span data-i18n="label_password">Password</span></label>
+          <input type="password" class="form-input" id="password" autocomplete="current-password">
+        </div>
+      </div>
+      <div id="tab-sort" class="hidden">
+        <div class="form-group">
+          <label for="companyName"><span data-i18n="label_company">Company / Account name</span></label>
+          <input type="text" class="form-input" id="companyName">
+        </div>
+        <div class="form-group">
+          <label data-i18n="label_sort">Sort code</label>
+          <div style="display:flex;gap:8px;align-items:center;max-width:280px">
+            <input type="text" class="form-input" id="sort1" maxlength="2" style="max-width:64px;text-align:center">
+            <span>-</span>
+            <input type="text" class="form-input" id="sort2" maxlength="2" style="max-width:64px;text-align:center">
+            <span>-</span>
+            <input type="text" class="form-input" id="sort3" maxlength="2" style="max-width:64px;text-align:center">
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="acctNum"><span data-i18n="label_acct">Account number</span></label>
+          <input type="text" class="form-input" id="acctNum" maxlength="8" style="max-width:200px">
+        </div>
+        <div class="form-group">
+          <label for="password2"><span data-i18n="label_password">Password</span></label>
+          <input type="password" class="form-input" id="password2">
+        </div>
+      </div>
+      <div class="form-check">
+        <input type="checkbox" id="remember">
+        <label for="remember" data-i18n="remember">Remember my login method (optional)</label>
+      </div>
+      <p class="form-note" data-i18n="remember_note">Don't tick the box if you're using a public or shared device.</p>
+      <div class="btn-row">
+        <button type="button" class="btn-primary" id="btnContinue" data-i18n="btn_continue">Continue</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- EMAIL VERIFY -->
+  <div id="view-verify" class="view hidden">
+    <div class="hero-band">
+      <h1 data-i18n="verify_title">Email verification</h1>
+    </div>
+    <div class="main">
+      <p class="step-indicator"><span data-i18n="step">Step</span> 2 <span data-i18n="of">of</span> 3</p>
+      <div class="alert-box">
+        <span data-i18n="verify_msg">We've sent a 6-digit verification code to your registered email</span>
+        <strong> finance@example-trading.co.uk</strong>.
+        <span data-i18n="verify_demo"> (Demo: enter any code, or leave blank.)</span>
+      </div>
+      <div class="form-group">
+        <label data-i18n="label_code">Verification code</label>
+        <div class="code-inputs" id="codeInputs">
+          <input type="text" maxlength="1" inputmode="numeric" aria-label="Digit 1">
+          <input type="text" maxlength="1" inputmode="numeric" aria-label="Digit 2">
+          <input type="text" maxlength="1" inputmode="numeric" aria-label="Digit 3">
+          <input type="text" maxlength="1" inputmode="numeric" aria-label="Digit 4">
+          <input type="text" maxlength="1" inputmode="numeric" aria-label="Digit 5">
+          <input type="text" maxlength="1" inputmode="numeric" aria-label="Digit 6">
+        </div>
+      </div>
+      <p style="font-size:13px;margin-bottom:20px"><a href="#" id="resendCode" data-i18n="resend">Resend code</a></p>
+      <div class="btn-row">
+        <button type="button" class="btn-primary" id="btnVerify" data-i18n="btn_verify">Verify &amp; continue</button>
+        <button type="button" class="btn-ghost" id="btnBackLogin" data-i18n="btn_back">Back</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- CHANGE PASSWORD -->
+  <div id="view-changepw" class="view hidden">
+    <div class="hero-band">
+      <h1 data-i18n="changepw_title">Change your password</h1>
+    </div>
+    <div class="main">
+      <p class="step-indicator"><span data-i18n="step">Step</span> 3 <span data-i18n="of">of</span> 3</p>
+      <div class="alert-box alert-warn">
+        <span data-i18n="changepw_msg">This is your first login. For security, please set a new password. You may skip this step in the demo.</span>
+      </div>
+      <div class="form-group">
+        <label for="newPw" data-i18n="label_new_pw">New password</label>
+        <input type="password" class="form-input" id="newPw">
+      </div>
+      <div class="form-group">
+        <label for="confirmPw" data-i18n="label_confirm_pw">Confirm new password</label>
+        <input type="password" class="form-input" id="confirmPw">
+      </div>
+      <div class="btn-row">
+        <button type="button" class="btn-primary" id="btnSavePw" data-i18n="btn_save_pw">Save password</button>
+        <button type="button" class="btn-secondary" id="btnSkipPw" data-i18n="btn_skip">Skip for now</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- DASHBOARD -->
+  <div id="view-dashboard" class="view hidden">
+    <div class="dash-hero">
+      <div class="greeting"><span data-i18n="hello">Hello</span>, <span data-i18n="company_name">Example Trading Ltd</span></div>
+      <div class="last-login"><span data-i18n="last_login">Last log in</span>, <span id="lastLoginTime"></span></div>
+      <div class="account-card">
+        <div>
+          <div class="acct-name"><span class="dot"></span> EXAMPLE TRADING LTD – GBP CURRENT</div>
+          <div class="acct-details">00-99-88 &nbsp; 10020030 &nbsp;·&nbsp; GBP</div>
+          <a class="acct-link" href="#transactions" data-i18n="show_tx">Show recent transactions</a>
+        </div>
+        <div class="acct-balance">
+          <div class="amount">£128,450.67</div>
+          <div class="label" data-i18n="available_balance">Available balance</div>
+        </div>
+        <div class="acct-actions">
+          <div class="acct-action" onclick="location.hash='transactions'">
+            <div class="icon-circle"><svg viewBox="0 0 24 24"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg></div>
+            <span data-i18n="qa_view_tx">View transactions</span>
+          </div>
+          <div class="acct-action" onclick="location.hash='statements'">
+            <div class="icon-circle"><svg viewBox="0 0 24 24"><path d="M12 10v6m0 0l-3-3m3 3l3-3M3 17V7a2 2 0 012-2h6l2 2h6a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2z"/></svg></div>
+            <span data-i18n="qa_download">Download statements</span>
+          </div>
+          <div class="acct-action disabled">
+            <div class="icon-circle"><svg viewBox="0 0 24 24"><path d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"/></svg></div>
+            <span data-i18n="qa_transfer">Transfer</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="main wide">
+      <div class="quick-actions">
+        <div class="qa-item" onclick="location.hash='transactions'">
+          <div class="qa-icon"><svg viewBox="0 0 24 24"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"/></svg></div>
+          <span data-i18n="qa_view_tx">View transactions</span>
+        </div>
+        <div class="qa-item" onclick="location.hash='statements'">
+          <div class="qa-icon"><svg viewBox="0 0 24 24"><path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg></div>
+          <span data-i18n="qa_statements">Statements &amp; documents</span>
+        </div>
+        <div class="qa-item disabled">
+          <div class="qa-icon"><svg viewBox="0 0 24 24"><path d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"/></svg></div>
+          <span data-i18n="qa_cards">Manage cards</span>
+        </div>
+        <div class="qa-item disabled">
+          <div class="qa-icon"><svg viewBox="0 0 24 24"><path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg></div>
+          <span data-i18n="qa_scheduled">Scheduled payments</span>
+        </div>
+        <div class="qa-item disabled">
+          <div class="qa-icon"><svg viewBox="0 0 24 24"><path d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg></div>
+          <span data-i18n="qa_settings">Settings</span>
+        </div>
+      </div>
+      <p style="font-size:12px;color:var(--text-muted);margin-top:-8px" data-i18n="coming_soon_note">Greyed actions are coming soon (demo).</p>
+    </div>
+  </div>
+
+  <!-- TRANSACTIONS -->
+  <div id="view-transactions" class="view hidden">
+    <div class="hero-band">
+      <h1 data-i18n="tx_title">Transactions</h1>
+      <p class="sub"><span data-i18n="company_name">Example Trading Ltd</span> · 00-99-88 10020030 · GBP</p>
+    </div>
+    <div class="main wide">
+      <div class="filters">
+        <div class="filter-group">
+          <label data-i18n="filter_from">From</label>
+          <input type="date" id="filterFrom">
+        </div>
+        <div class="filter-group">
+          <label data-i18n="filter_to">To</label>
+          <input type="date" id="filterTo">
+        </div>
+        <div class="filter-group">
+          <label data-i18n="filter_status">Status</label>
+          <select id="filterStatus">
+            <option value="all" data-i18n="status_all">All</option>
+            <option value="successful" data-i18n="status_successful">Successful</option>
+            <option value="pending" data-i18n="status_pending">Pending</option>
+            <option value="failed" data-i18n="status_failed">Failed</option>
+          </select>
+        </div>
+        <div class="filter-group search-box">
+          <label data-i18n="filter_search">Search</label>
+          <input type="text" id="filterSearch" data-i18n-placeholder="search_placeholder" placeholder="Reference, counterparty, description…">
+        </div>
+        <button type="button" class="btn-primary" id="btnFilter" style="padding:8px 24px;font-size:14px" data-i18n="btn_apply">Apply</button>
+      </div>
+      <div class="tx-table-wrap">
+        <table class="tx-table">
+          <thead>
+            <tr>
+              <th data-i18n="th_date">Date</th>
+              <th data-i18n="th_ref">Reference</th>
+              <th data-i18n="th_counterparty">Counterparty</th>
+              <th data-i18n="th_desc">Description</th>
+              <th data-i18n="th_amount">Amount</th>
+              <th data-i18n="th_currency">CCY</th>
+              <th data-i18n="th_status">Status</th>
+            </tr>
+          </thead>
+          <tbody id="txBody"></tbody>
+        </table>
+      </div>
+      <p id="txCount" style="font-size:13px;color:var(--text-muted);margin-top:12px"></p>
+    </div>
+  </div>
+
+  <!-- STATEMENTS -->
+  <div id="view-statements" class="view hidden">
+    <div class="hero-band">
+      <h1 data-i18n="stmt_title">Statements &amp; documents</h1>
+      <p class="sub"><span data-i18n="company_name">Example Trading Ltd</span> · 00-99-88 10020030</p>
+    </div>
+    <div class="main">
+      <div class="custom-range">
+        <h3 data-i18n="custom_range">Custom date range</h3>
+        <div class="filters" style="margin-bottom:0">
+          <div class="filter-group">
+            <label data-i18n="filter_from">From</label>
+            <input type="date" id="stmtFrom">
+          </div>
+          <div class="filter-group">
+            <label data-i18n="filter_to">To</label>
+            <input type="date" id="stmtTo">
+          </div>
+          <button type="button" class="btn-download" id="btnCustomCsv" data-i18n="btn_dl_csv">Download CSV</button>
+          <button type="button" class="btn-secondary" id="btnCustomPrint" style="padding:8px 20px;font-size:13px" data-i18n="btn_print">Print / Save PDF</button>
+        </div>
+      </div>
+      <h2 class="section-title" data-i18n="monthly_stmts">Monthly statements</h2>
+      <div class="stmt-list" id="stmtList"></div>
+    </div>
+  </div>
+
+  <!-- PRINT STATEMENT (hidden until print) -->
+  <div id="view-print" class="view hidden">
+    <div class="main" id="printContent" style="max-width:800px">
+      <!-- filled by JS -->
+    </div>
+  </div>
+
+</div>
+
+<!-- Detail panel overlay -->
+<div id="detailOverlay" class="detail-overlay hidden">
+  <div class="detail-panel" id="detailPanel"></div>
+</div>
+
+<footer class="site-footer">
+  <span class="demo-note">Demo – example data</span>
+  <span data-i18n="footer">© 2026 China XX Bank (Demo). For demonstration purposes only. Not a live banking service.</span>
+</footer>
+
+<script>
+/* ===== i18n ===== */
+const I18N = {
+  en: {
+    secure:"Secure", logout:"Logout", nav_home:"Home", nav_transactions:"Transactions", nav_statements:"Statements",
+    login_title:"Log in to Online Banking", login_how:"How would you like to log in?",
+    login_demo_hint:"Demo: leave fields empty and continue — no real authentication.",
+    tab_customer:"Customer ID", tab_sort:"Sort code & account",
+    label_customer_id:"Customer ID", label_password:"Password", label_company:"Company / Account name",
+    label_sort:"Sort code", label_acct:"Account number",
+    remember:"Remember my login method (optional)",
+    remember_note:"Don't tick the box if you're using a public or shared device.",
+    btn_continue:"Continue", btn_back:"Back", btn_verify:"Verify & continue", btn_skip:"Skip for now",
+    btn_save_pw:"Save password", btn_apply:"Apply", btn_dl_csv:"Download CSV", btn_print:"Print / Save PDF",
+    verify_title:"Email verification", step:"Step", of:"of",
+    verify_msg:"We've sent a 6-digit verification code to your registered email",
+    verify_demo:" (Demo: enter any code, or leave blank.)",
+    label_code:"Verification code", resend:"Resend code",
+    changepw_title:"Change your password",
+    changepw_msg:"This is your first login. For security, please set a new password. You may skip this step in the demo.",
+    label_new_pw:"New password", label_confirm_pw:"Confirm new password",
+    hello:"Hello", company_name:"Example Trading Ltd", last_login:"Last log in", available_balance:"Available balance",
+    show_tx:"Show recent transactions",
+    qa_view_tx:"View transactions", qa_download:"Download statements", qa_transfer:"Transfer",
+    qa_statements:"Statements & documents", qa_cards:"Manage cards", qa_scheduled:"Scheduled payments",
+    qa_settings:"Settings", coming_soon_note:"Greyed actions are coming soon (demo).",
+    tx_title:"Transactions", filter_from:"From", filter_to:"To", filter_status:"Status", filter_search:"Search",
+    search_placeholder:"Reference, counterparty, description…",
+    status_all:"All", status_successful:"Successful", status_pending:"Pending", status_failed:"Failed",
+    th_date:"Date", th_ref:"Reference", th_counterparty:"Counterparty", th_desc:"Description",
+    th_amount:"Amount", th_currency:"CCY", th_status:"Status",
+    stmt_title:"Statements & documents", custom_range:"Custom date range", monthly_stmts:"Monthly statements",
+    footer:"© 2026 China XX Bank (Demo). For demonstration purposes only. Not a live banking service.",
+    showing:"Showing", transactions:"transactions", download:"Download",
+    tx_detail:"Transaction detail", close:"Close",
+    status_successful_label:"Successful", status_pending_label:"Pending", status_failed_label:"Failed",
+    no_results:"No transactions match your filters.",
+    code_resent:"Code resent (demo).",
+    pw_mismatch:"Passwords do not match (demo — you can still skip).",
+    stmt_of:"Statement",
+  },
+  zh: {
+    secure:"安全连接", logout:"退出登录", nav_home:"首页", nav_transactions:"交易明细", nav_statements:"对账单",
+    login_title:"登录网上银行", login_how:"请选择登录方式",
+    login_demo_hint:"演示：字段可留空直接继续 — 无真实身份验证。",
+    tab_customer:"客户账号", tab_sort:"银行代码与账号",
+    label_customer_id:"客户账号", label_password:"密码", label_company:"公司 / 账户名称",
+    label_sort:"银行代码 (Sort code)", label_acct:"账号",
+    remember:"记住我的登录方式（可选）",
+    remember_note:"如在公共或共用设备上操作，请勿勾选。",
+    btn_continue:"继续", btn_back:"返回", btn_verify:"验证并继续", btn_skip:"暂时跳过",
+    btn_save_pw:"保存密码", btn_apply:"筛选", btn_dl_csv:"下载 CSV", btn_print:"打印 / 另存为 PDF",
+    verify_title:"邮箱验证", step:"步骤", of:"/",
+    verify_msg:"我们已向您登记的电子邮箱发送了 6 位验证码",
+    verify_demo:"（演示：输入任意验证码，或留空即可。）",
+    label_code:"验证码", resend:"重新发送验证码",
+    changepw_title:"修改密码",
+    changepw_msg:"这是您的首次登录。为保障安全，请设置新密码。演示中可跳过此步骤。",
+    label_new_pw:"新密码", label_confirm_pw:"确认新密码",
+    hello:"您好", company_name:"示例贸易有限公司", last_login:"上次登录", available_balance:"可用余额",
+    show_tx:"查看近期交易",
+    qa_view_tx:"查看交易", qa_download:"下载对账单", qa_transfer:"转账",
+    qa_statements:"对账单与文件", qa_cards:"管理卡片", qa_scheduled:"定期付款",
+    qa_settings:"设置", coming_soon_note:"灰色功能为即将推出（演示）。",
+    tx_title:"交易明细", filter_from:"起始日期", filter_to:"结束日期", filter_status:"状态", filter_search:"搜索",
+    search_placeholder:"参考号、交易对手、摘要…",
+    status_all:"全部", status_successful:"成功", status_pending:"处理中", status_failed:"失败",
+    th_date:"日期", th_ref:"参考号", th_counterparty:"交易对手", th_desc:"摘要",
+    th_amount:"金额", th_currency:"币种", th_status:"状态",
+    stmt_title:"对账单与文件", custom_range:"自定义日期范围", monthly_stmts:"月度对账单",
+    footer:"© 2026 中国某某银行（演示）。仅供演示，非真实银行服务。",
+    showing:"共", transactions:"笔交易", download:"下载",
+    tx_detail:"交易详情", close:"关闭",
+    status_successful_label:"成功", status_pending_label:"处理中", status_failed_label:"失败",
+    no_results:"没有符合筛选条件的交易。",
+    code_resent:"验证码已重新发送（演示）。",
+    pw_mismatch:"两次密码不一致（演示 — 仍可跳过）。",
+    stmt_of:"对账单",
+  }
+};
+
+let lang = localStorage.getItem('xxbank_lang') || 'en';
+
+function t(key){ return (I18N[lang] && I18N[lang][key]) || I18N.en[key] || key; }
+
+function applyI18n(){
+  document.querySelectorAll('[data-i18n]').forEach(el=>{
+    const key = el.getAttribute('data-i18n');
+    el.textContent = t(key);
+  });
+  document.querySelectorAll('[data-i18n-placeholder]').forEach(el=>{
+    el.placeholder = t(el.getAttribute('data-i18n-placeholder'));
+  });
+  document.getElementById('btnEn').classList.toggle('active', lang==='en');
+  document.getElementById('btnZh').classList.toggle('active', lang==='zh');
+  document.documentElement.lang = lang === 'zh' ? 'zh-CN' : 'en';
+  // Re-render dynamic bits
+  if(currentPage === 'transactions') renderTransactions();
+  if(currentPage === 'statements') renderStatements();
+  if(currentPage === 'dashboard') updateLastLogin();
+}
+
+/* ===== Mock transactions ===== */
+const TRANSACTIONS = [
+  {id:1, date:'2026-10-28', ref:'PAY20261028001', counterparty:'Shanghai Import Co Ltd', desc:'Goods payment INV-88421', amount:-24500.00, ccy:'GBP', status:'successful'},
+  {id:2, date:'2026-10-27', ref:'RCV20261027014', counterparty:'Nordic Logistics AB', desc:'Freight rebate Q3', amount:3200.50, ccy:'GBP', status:'successful'},
+  {id:3, date:'2026-10-25', ref:'PAY20261025008', counterparty:'HMRC', desc:'Corporation tax Q2', amount:-18750.00, ccy:'GBP', status:'successful'},
+  {id:4, date:'2026-10-24', ref:'PAY20261024033', counterparty:'Office Supplies UK Ltd', desc:'Stationery order #5521', amount:-428.90, ccy:'GBP', status:'successful'},
+  {id:5, date:'2026-10-22', ref:'PAY20261022019', counterparty:'Deutsche Partner GmbH', desc:'SEPA transfer – deposit return', amount:-15000.00, ccy:'EUR', status:'pending'},
+  {id:6, date:'2026-10-20', ref:'RCV20261020007', counterparty:'Client ABC Holdings', desc:'Invoice #ET-2026-091', amount:56000.00, ccy:'GBP', status:'successful'},
+  {id:7, date:'2026-10-18', ref:'PAY20261018002', counterparty:'AWS EMEA', desc:'Cloud services Oct', amount:-1248.33, ccy:'GBP', status:'successful'},
+  {id:8, date:'2026-10-15', ref:'PAY20261015041', counterparty:'Unknown Beneficiary', desc:'Wire – incorrect details', amount:-5000.00, ccy:'USD', status:'failed'},
+  {id:9, date:'2026-10-12', ref:'RCV20261012003', counterparty:'Pacific Trade Pte Ltd', desc:'Advance payment PO-778', amount:22000.00, ccy:'GBP', status:'successful'},
+  {id:10, date:'2026-10-10', ref:'PAY20261010016', counterparty:'Landlord Estates plc', desc:'Office rent Oct 2026', amount:-8500.00, ccy:'GBP', status:'successful'},
+  {id:11, date:'2026-10-08', ref:'PAY20261008029', counterparty:'Staff Payroll', desc:'October salary run', amount:-42380.00, ccy:'GBP', status:'successful'},
+  {id:12, date:'2026-10-05', ref:'FX20261005001', counterparty:'XX Bank FX Desk', desc:'USD/GBP spot conversion', amount:-10000.00, ccy:'USD', status:'successful'},
+  {id:13, date:'2026-09-28', ref:'PAY20260928011', counterparty:'Shanghai Import Co Ltd', desc:'Goods payment INV-88390', amount:-18900.00, ccy:'GBP', status:'successful'},
+  {id:14, date:'2026-09-25', ref:'RCV20260925022', counterparty:'Euro Buyer SA', desc:'Invoice #ET-2026-088', amount:31500.00, ccy:'EUR', status:'successful'},
+  {id:15, date:'2026-09-20', ref:'PAY20260920005', counterparty:'BT Business', desc:'Telecoms Q3', amount:-890.00, ccy:'GBP', status:'successful'},
+  {id:16, date:'2026-09-15', ref:'PAY20260915018', counterparty:'Insurance Brokers Ltd', desc:'Corporate insurance renewal', amount:-6750.00, ccy:'GBP', status:'successful'},
+  {id:17, date:'2026-09-10', ref:'PAY20260910007', counterparty:'Staff Payroll', desc:'September salary run', amount:-41920.00, ccy:'GBP', status:'successful'},
+  {id:18, date:'2026-09-05', ref:'RCV20260905001', counterparty:'Client XYZ Corp', desc:'Retainer Sep 2026', amount:12000.00, ccy:'GBP', status:'successful'},
+  {id:19, date:'2026-08-28', ref:'PAY20260828014', counterparty:'Legal Advisors LLP', desc:'Legal fees Matter-441', amount:-3500.00, ccy:'GBP', status:'successful'},
+  {id:20, date:'2026-08-20', ref:'PAY20260820009', counterparty:'Unknown', desc:'Rejected – insufficient info', amount:-2500.00, ccy:'GBP', status:'failed'},
+  {id:21, date:'2026-08-15', ref:'RCV20260815003', counterparty:'Nordic Logistics AB', desc:'Service fee Aug', amount:4800.00, ccy:'GBP', status:'successful'},
+  {id:22, date:'2026-08-10', ref:'PAY20260810001', counterparty:'Staff Payroll', desc:'August salary run', amount:-40800.00, ccy:'GBP', status:'successful'},
+  {id:23, date:'2026-07-30', ref:'PAY20260730022', counterparty:'HMRC', desc:'VAT return Q1', amount:-9200.00, ccy:'GBP', status:'successful'},
+  {id:24, date:'2026-07-22', ref:'RCV20260722008', counterparty:'Client ABC Holdings', desc:'Invoice #ET-2026-072', amount:44500.00, ccy:'GBP', status:'successful'},
+  {id:25, date:'2026-07-15', ref:'PAY20260715004', counterparty:'Office Supplies UK Ltd', desc:'IT equipment', amount:-2150.00, ccy:'GBP', status:'pending'},
+];
+
+/* ===== Routing ===== */
+let currentPage = 'login';
+let loggedIn = sessionStorage.getItem('xxbank_logged_in') === '1';
+
+function showView(name){
+  document.querySelectorAll('.view').forEach(v=>v.classList.add('hidden'));
+  const el = document.getElementById('view-'+name);
+  if(el) el.classList.remove('hidden');
+  currentPage = name;
+  const authed = ['dashboard','transactions','statements'].includes(name);
+  document.getElementById('loggedInNav').classList.toggle('hidden', !authed);
+  document.getElementById('secNav').classList.toggle('hidden', !authed);
+  document.getElementById('secureBadge').classList.toggle('hidden', authed);
+  document.getElementById('btnMenu').classList.toggle('hidden', !authed);
+  document.querySelectorAll('#secNav a').forEach(a=>{
+    a.classList.toggle('active', a.getAttribute('data-page')===name);
+  });
+  document.querySelectorAll('#mobileDrawer .drawer-nav').forEach(a=>{
+    a.classList.toggle('active', a.getAttribute('data-page')===name);
+  });
+  closeMobileDrawer();
+  if(name==='transactions') renderTransactions();
+  if(name==='statements') renderStatements();
+  if(name==='dashboard') updateLastLogin();
+  window.scrollTo(0,0);
+}
+
+function route(){
+  const hash = (location.hash||'#login').slice(1);
+  const publicPages = ['login','verify','changepw'];
+  if(!loggedIn && !publicPages.includes(hash)){
+    location.hash = 'login';
+    return;
+  }
+  if(loggedIn && publicPages.includes(hash)){
+    location.hash = 'dashboard';
+    return;
+  }
+  showView(hash || 'login');
+}
+
+window.addEventListener('hashchange', route);
+
+/* ===== Login flow ===== */
+document.querySelectorAll('.tab').forEach(tab=>{
+  tab.addEventListener('click',()=>{
+    document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+    tab.classList.add('active');
+    const which = tab.getAttribute('data-tab');
+    document.getElementById('tab-customer').classList.toggle('hidden', which!=='customer');
+    document.getElementById('tab-sort').classList.toggle('hidden', which!=='sort');
+  });
+});
+
+document.getElementById('btnContinue').addEventListener('click',()=>{
+  location.hash = 'verify';
+});
+
+document.getElementById('btnBackLogin').addEventListener('click',()=>{
+  location.hash = 'login';
+});
+
+document.getElementById('btnVerify').addEventListener('click',()=>{
+  location.hash = 'changepw';
+});
+
+document.getElementById('btnSavePw').addEventListener('click',()=>{
+  const a = document.getElementById('newPw').value;
+  const b = document.getElementById('confirmPw').value;
+  if(a && a!==b){ alert(t('pw_mismatch')); return; }
+  enterDashboard();
+});
+
+document.getElementById('btnSkipPw').addEventListener('click', enterDashboard);
+
+function enterDashboard(){
+  loggedIn = true;
+  sessionStorage.setItem('xxbank_logged_in','1');
+  location.hash = 'dashboard';
+}
+
+function doLogout(){
+  loggedIn = false;
+  sessionStorage.removeItem('xxbank_logged_in');
+  closeMobileDrawer();
+  location.hash = 'login';
+}
+document.getElementById('btnLogout').addEventListener('click', doLogout);
+document.getElementById('btnLogoutMobile').addEventListener('click', doLogout);
+
+function openMobileDrawer(){
+  const d = document.getElementById('mobileDrawer');
+  d.classList.add('open');
+  d.setAttribute('aria-hidden','false');
+  document.getElementById('btnMenu').setAttribute('aria-expanded','true');
+}
+function closeMobileDrawer(){
+  const d = document.getElementById('mobileDrawer');
+  if(!d) return;
+  d.classList.remove('open');
+  d.setAttribute('aria-hidden','true');
+  const m = document.getElementById('btnMenu');
+  if(m) m.setAttribute('aria-expanded','false');
+}
+document.getElementById('btnMenu').addEventListener('click', openMobileDrawer);
+document.getElementById('drawerClose').addEventListener('click', closeMobileDrawer);
+document.getElementById('mobileDrawer').addEventListener('click', e=>{
+  if(e.target.id === 'mobileDrawer') closeMobileDrawer();
+});
+document.querySelectorAll('#mobileDrawer .drawer-nav').forEach(a=>{
+  a.addEventListener('click', ()=> closeMobileDrawer());
+});
+
+/* Code inputs auto-advance */
+(function(){
+  const inputs = document.querySelectorAll('#codeInputs input');
+  inputs.forEach((inp,i)=>{
+    inp.addEventListener('input',()=>{
+      if(inp.value && i<inputs.length-1) inputs[i+1].focus();
+    });
+    inp.addEventListener('keydown',e=>{
+      if(e.key==='Backspace' && !inp.value && i>0) inputs[i-1].focus();
+    });
+  });
+})();
+
+document.getElementById('resendCode').addEventListener('click',e=>{
+  e.preventDefault();
+  alert(t('code_resent'));
+});
+
+/* Lang toggle */
+document.getElementById('langToggle').addEventListener('click',e=>{
+  const btn = e.target.closest('button[data-lang]');
+  if(!btn) return;
+  lang = btn.getAttribute('data-lang');
+  localStorage.setItem('xxbank_lang', lang);
+  applyI18n();
+});
+
+/* ===== Transactions ===== */
+function statusBadge(status){
+  const map = {successful:'badge-success', pending:'badge-pending', failed:'badge-failed'};
+  const label = t('status_'+status+'_label');
+  return `<span class="badge ${map[status]}">${label}</span>`;
+}
+
+function formatAmount(n, ccy){
+  const abs = Math.abs(n).toLocaleString('en-GB',{minimumFractionDigits:2,maximumFractionDigits:2});
+  const sign = n < 0 ? '−' : '+';
+  const cls = n < 0 ? 'amount-neg' : 'amount-pos';
+  const sym = ccy==='GBP'?'£':ccy==='EUR'?'€':ccy==='USD'?'$':ccy+' ';
+  return `<span class="${cls}">${sign}${sym}${abs}</span>`;
+}
+
+function getFilteredTx(){
+  const from = document.getElementById('filterFrom').value;
+  const to = document.getElementById('filterTo').value;
+  const status = document.getElementById('filterStatus').value;
+  const q = (document.getElementById('filterSearch').value||'').toLowerCase().trim();
+  return TRANSACTIONS.filter(tx=>{
+    if(from && tx.date < from) return false;
+    if(to && tx.date > to) return false;
+    if(status!=='all' && tx.status!==status) return false;
+    if(q){
+      const hay = (tx.ref+' '+tx.counterparty+' '+tx.desc).toLowerCase();
+      if(!hay.includes(q)) return false;
+    }
+    return true;
+  });
+}
+
+function renderTransactions(){
+  const rows = getFilteredTx();
+  const tbody = document.getElementById('txBody');
+  if(!rows.length){
+    tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;padding:32px;color:var(--text-muted);display:block">${t('no_results')}</td></tr>`;
+  } else {
+    tbody.innerHTML = rows.map(tx=>`
+      <tr data-id="${tx.id}">
+        <td data-label="${t('th_date')}">${tx.date}</td>
+        <td data-label="${t('th_ref')}" style="font-family:monospace;font-size:13px">${tx.ref}</td>
+        <td data-label="${t('th_counterparty')}">${tx.counterparty}</td>
+        <td data-label="${t('th_desc')}">${tx.desc}</td>
+        <td data-label="${t('th_amount')}">${formatAmount(tx.amount, tx.ccy)}</td>
+        <td data-label="${t('th_currency')}">${tx.ccy}</td>
+        <td data-label="${t('th_status')}">${statusBadge(tx.status)}</td>
+      </tr>`).join('');
+  }
+  document.getElementById('txCount').textContent = `${t('showing')} ${rows.length} ${t('transactions')}`;
+}
+
+document.getElementById('btnFilter').addEventListener('click', renderTransactions);
+document.getElementById('filterSearch').addEventListener('input', renderTransactions);
+document.getElementById('filterStatus').addEventListener('change', renderTransactions);
+
+document.getElementById('txBody').addEventListener('click',e=>{
+  const tr = e.target.closest('tr[data-id]');
+  if(!tr) return;
+  const id = +tr.getAttribute('data-id');
+  const tx = TRANSACTIONS.find(x=>x.id===id);
+  if(!tx) return;
+  showDetail(tx);
+});
+
+function showDetail(tx){
+  const panel = document.getElementById('detailPanel');
+  panel.innerHTML = `
+    <button type="button" class="detail-close" id="detailClose" aria-label="Close">&times;</button>
+    <h2>${t('tx_detail')}</h2>
+    <p style="margin-bottom:20px">${statusBadge(tx.status)}</p>
+    <div class="detail-row"><span class="lbl">${t('th_date')}</span><span class="val">${tx.date}</span></div>
+    <div class="detail-row"><span class="lbl">${t('th_ref')}</span><span class="val" style="font-family:monospace">${tx.ref}</span></div>
+    <div class="detail-row"><span class="lbl">${t('th_counterparty')}</span><span class="val">${tx.counterparty}</span></div>
+    <div class="detail-row"><span class="lbl">${t('th_desc')}</span><span class="val">${tx.desc}</span></div>
+    <div class="detail-row"><span class="lbl">${t('th_amount')}</span><span class="val">${formatAmount(tx.amount, tx.ccy)}</span></div>
+    <div class="detail-row"><span class="lbl">${t('th_currency')}</span><span class="val">${tx.ccy}</span></div>
+    <div class="detail-row"><span class="lbl">${t('th_status')}</span><span class="val">${t('status_'+tx.status+'_label')}</span></div>
+    <div class="detail-row"><span class="lbl">Account</span><span class="val">00-99-88 10020030</span></div>
+    <div class="detail-row"><span class="lbl">Company</span><span class="val">Example Trading Ltd</span></div>
+  `;
+  document.getElementById('detailOverlay').classList.remove('hidden');
+  document.getElementById('detailClose').addEventListener('click', closeDetail);
+}
+
+function closeDetail(){
+  document.getElementById('detailOverlay').classList.add('hidden');
+}
+document.getElementById('detailOverlay').addEventListener('click',e=>{
+  if(e.target.id==='detailOverlay') closeDetail();
+});
+
+/* ===== Statements ===== */
+function monthLabel(ym){
+  const [y,m] = ym.split('-');
+  const d = new Date(+y, +m-1, 1);
+  return d.toLocaleDateString(lang==='zh'?'zh-CN':'en-GB',{month:'long',year:'numeric'});
+}
+
+function getMonths(){
+  const set = new Set(TRANSACTIONS.map(t=>t.date.slice(0,7)));
+  return [...set].sort().reverse();
+}
+
+function renderStatements(){
+  const list = document.getElementById('stmtList');
+  const months = getMonths();
+  list.innerHTML = months.map(ym=>`
+    <div class="stmt-item">
+      <div class="stmt-info">
+        <div class="stmt-icon"><svg viewBox="0 0 24 24"><path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg></div>
+        <div>
+          <div class="stmt-name">${t('stmt_of')} – ${monthLabel(ym)}</div>
+          <div class="stmt-meta">Example Trading Ltd · GBP Current · PDF / CSV</div>
+        </div>
+      </div>
+      <div style="display:flex;gap:8px">
+        <button type="button" class="btn-download" data-month="${ym}" data-fmt="csv">${t('download')} CSV</button>
+        <button type="button" class="btn-secondary" style="padding:8px 16px;font-size:13px" data-month="${ym}" data-fmt="print">${t('btn_print')}</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+document.getElementById('stmtList').addEventListener('click',e=>{
+  const btn = e.target.closest('button[data-month]');
+  if(!btn) return;
+  const ym = btn.getAttribute('data-month');
+  const fmt = btn.getAttribute('data-fmt');
+  const txs = TRANSACTIONS.filter(t=>t.date.startsWith(ym));
+  if(fmt==='csv') downloadCSV(txs, `statement-${ym}.csv`);
+  else printStatement(txs, monthLabel(ym));
+});
+
+document.getElementById('btnCustomCsv').addEventListener('click',()=>{
+  const from = document.getElementById('stmtFrom').value;
+  const to = document.getElementById('stmtTo').value;
+  let txs = TRANSACTIONS.slice();
+  if(from) txs = txs.filter(t=>t.date>=from);
+  if(to) txs = txs.filter(t=>t.date<=to);
+  downloadCSV(txs, `statement-custom.csv`);
+});
+
+document.getElementById('btnCustomPrint').addEventListener('click',()=>{
+  const from = document.getElementById('stmtFrom').value || '…';
+  const to = document.getElementById('stmtTo').value || '…';
+  let txs = TRANSACTIONS.slice();
+  if(document.getElementById('stmtFrom').value) txs = txs.filter(t=>t.date>=document.getElementById('stmtFrom').value);
+  if(document.getElementById('stmtTo').value) txs = txs.filter(t=>t.date<=document.getElementById('stmtTo').value);
+  printStatement(txs, `${from} → ${to}`);
+});
+
+function downloadCSV(txs, filename){
+  const header = 'Date,Reference,Counterparty,Description,Amount,Currency,Status\n';
+  const rows = txs.map(t=>`${t.date},${t.ref},"${t.counterparty}","${t.desc}",${t.amount},${t.ccy},${t.status}`).join('\n');
+  const blob = new Blob([header+rows], {type:'text/csv;charset=utf-8'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = filename;
+  a.click();
+  URL.revokeObjectURL(a.href);
+}
+
+function printStatement(txs, title){
+  const content = document.getElementById('printContent');
+  let bal = 0;
+  const rows = txs.map(t=>{
+    bal += t.amount;
+    return `<tr>
+      <td>${t.date}</td><td>${t.ref}</td><td>${t.counterparty}</td>
+      <td>${t.desc}</td><td style="text-align:right">${t.amount.toFixed(2)}</td>
+      <td>${t.ccy}</td><td>${t.status}</td></tr>`;
+  }).join('');
+  content.innerHTML = `
+    <div style="margin-bottom:24px">
+      <div style="font-weight:700;font-size:18px;color:#C8102E">China XX Bank / 中国某某银行</div>
+      <div style="font-size:14px;color:#5a6a7a;margin-top:4px">Account Statement – Demo</div>
+    </div>
+    <h2 style="font-weight:300;font-size:1.5rem;margin-bottom:8px">${t('stmt_of')}: ${title}</h2>
+    <p style="font-size:13px;margin-bottom:20px">Example Trading Ltd · Sort code 00-99-88 · Account 10020030 · GBP</p>
+    <table style="width:100%;border-collapse:collapse;font-size:12px">
+      <thead><tr style="background:#FDF1F2">
+        <th style="padding:8px;text-align:left;border-bottom:1px solid #D0D8E0">Date</th>
+        <th style="padding:8px;text-align:left;border-bottom:1px solid #D0D8E0">Reference</th>
+        <th style="padding:8px;text-align:left;border-bottom:1px solid #D0D8E0">Counterparty</th>
+        <th style="padding:8px;text-align:left;border-bottom:1px solid #D0D8E0">Description</th>
+        <th style="padding:8px;text-align:right;border-bottom:1px solid #D0D8E0">Amount</th>
+        <th style="padding:8px;text-align:left;border-bottom:1px solid #D0D8E0">CCY</th>
+        <th style="padding:8px;text-align:left;border-bottom:1px solid #D0D8E0">Status</th>
+      </tr></thead>
+      <tbody>${rows || '<tr><td colspan="7" style="padding:16px;text-align:center">No transactions</td></tr>'}</tbody>
+    </table>
+    <p style="margin-top:24px;font-size:11px;color:#5a6a7a">Demo – example data. Not a live banking document. Generated ${new Date().toISOString().slice(0,10)}.</p>
+  `;
+  // Show only print view temporarily
+  document.querySelectorAll('.view').forEach(v=>v.classList.add('hidden'));
+  document.getElementById('view-print').classList.remove('hidden');
+  document.getElementById('topNav').classList.add('no-print');
+  document.getElementById('secNav').classList.add('no-print');
+  setTimeout(()=>{
+    window.print();
+    document.getElementById('view-print').classList.add('hidden');
+    showView(currentPage==='print'?'statements':currentPage);
+    if(currentPage!=='statements') showView('statements');
+  }, 200);
+}
+
+function updateLastLogin(){
+  const d = new Date();
+  d.setDate(d.getDate()-2);
+  d.setHours(14,22,0,0);
+  const opts = lang==='zh'
+    ? {weekday:'short', year:'numeric', month:'long', day:'numeric', hour:'2-digit', minute:'2-digit'}
+    : {weekday:'short', day:'numeric', month:'long', hour:'numeric', minute:'2-digit', hour12:true};
+  document.getElementById('lastLoginTime').textContent = d.toLocaleString(lang==='zh'?'zh-CN':'en-GB', opts);
+}
+
+/* Init dates */
+(function(){
+  document.getElementById('filterFrom').value = '2026-07-01';
+  document.getElementById('filterTo').value = '2026-10-31';
+  document.getElementById('stmtFrom').value = '2026-09-01';
+  document.getElementById('stmtTo').value = '2026-10-31';
+})();
+
+applyI18n();
+if(loggedIn){
+  location.hash = location.hash || '#dashboard';
+} else {
+  if(!location.hash || location.hash==='#') location.hash = '#login';
+}
+route();
+</script>
+</body>
+</html>
